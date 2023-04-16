@@ -1,0 +1,46 @@
+// Instance Graph
+digraph {
+	node [shape=circle]
+	1 [label="1 = SRP"]
+	2 [label="2 = FRPP"]
+	3 [label="3 = RIBPC"]
+	4 [label="4 = RBPC"]
+	6 [label="6 = SRPP"]
+	5 [label="5 = REPC"]
+	7 [label="7 = REPP"]
+	8 [label="8 = SRPP"]
+	9 [label="9 = RBPC"]
+	10 [label="10 = RIBPC"]
+	11 [label="11 = REPC"]
+	12 [label="12 = FRPP"]
+	13 [label="13 = EPP"]
+	14 [label="14 = SLRRP"]
+	15 [label="15 = LRIRV"]
+	16 [label="16 = LRERV"]
+	17 [label="17 = LRRR"]
+	18 [label="18 = FLRRP"]
+	19 [label="19 = FRP"]
+	7 -> 8
+	8 -> 9
+	8 -> 10
+	8 -> 11
+	9 -> 12
+	10 -> 12
+	11 -> 12
+	12 -> 13
+	13 -> 14
+	14 -> 15
+	14 -> 16
+	15 -> 17
+	16 -> 17
+	17 -> 18
+	18 -> 19
+	2 -> 3
+	2 -> 4
+	2 -> 5
+	6 -> 7
+	1 -> 2
+	3 -> 6
+	4 -> 6
+	5 -> 6
+}
