@@ -19,7 +19,7 @@ spark = SparkSession(sc)
 
 # Root window
 root = tk.Tk()
-root.wm_maxsize(1200, 750)
+root.wm_maxsize(1000, 750)
 width_value = root.winfo_screenwidth()
 height_value = root.winfo_screenheight()
 root.geometry("%dx%d+0+0" % (width_value, height_value))
@@ -245,7 +245,7 @@ def items_selected(event, listbox):
     else:
         global img, expand_btn, scrolled_text
         imgorig = Image.open(path_photo)
-        resized_image = imgorig.resize((400, imgorig.height), Image.ANTIALIAS)
+        resized_image = imgorig.resize((450, imgorig.height), Image.ANTIALIAS)
         img = ImageTk.PhotoImage(resized_image)
         scrolled_text = scrolledtext.ScrolledText(canvas)
         scrolled_text.configure(state="disabled")
