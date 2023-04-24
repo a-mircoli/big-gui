@@ -4,7 +4,7 @@
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
-from tkinter.scrolledtext import ScrolledText
+from tkinter import scrolledtext
 from PIL import Image, ImageTk
 from pyspark.context import SparkContext
 from tkinter import filedialog as fd
@@ -19,7 +19,7 @@ spark = SparkSession(sc)
 
 # Root window
 root = tk.Tk()
-root.wm_maxsize(1200, 750)
+root.wm_maxsize(1000, 750)
 width_value = root.winfo_screenwidth()
 height_value = root.winfo_screenheight()
 root.geometry("%dx%d+0+0" % (width_value, height_value))
@@ -71,6 +71,7 @@ def open_xes_file(label_welcome, browse_btn):
                     label_load,
                     file_xes,
                     label_welcome,
+                    browse_btn
                 ),
             )
         else:
@@ -113,7 +114,7 @@ def open_xes_file(label_welcome, browse_btn):
         return
 
 
-def run_big(file_net, label_load, file_xes, label_welcome):
+def run_big(file_net, label_load, file_xes, label_welcome, browse_btn):
     # create file parquet
     # folderPath = path of the folder you want to run mvn clean install on
     os.system("cd")
@@ -142,7 +143,7 @@ def run_big(file_net, label_load, file_xes, label_welcome):
     bg(file_net, file_parquet)
     label_load.destroy()
     gif_label.destroy()
-    show_trace()
+    show_trace(label_welcome, browse_btn)
 
 
 def show_gif():
@@ -176,7 +177,7 @@ def show_gif():
         pass
 
 
-def show_trace():
+def show_trace(label_welcome, browse_btn):
     # show list of trace
     ic = Image.open("/home/jovyan/work/BIG2/BigSpark/images/arrow-back-11-48.png")
     icon_back = ImageTk.PhotoImage(ic)
@@ -210,20 +211,32 @@ def show_trace():
         fg="#2C5BA9",
     )
     label.grid(column=0, row=0, sticky="NS", pady=10)
+    label_welcome.destroy() 
+    browse_btn.destroy()
+    
 
 
 def come_back(back_btn, vertscroll, listbox, label):
     # back button
-    back_btn.destroy()
-    vertscroll.destroy()
-    listbox.destroy()
-    label.destroy()
-    expand_btn.destroy()
-    scrolled_text.destroy()
-    scrolled_text.vbar.destroy()
-    define_window()
-
-
+    try:
+        back_btn.destroy()
+        vertscroll.destroy()
+        listbox.destroy()
+        label.destroy()
+        expand_btn.destroy()
+        textContainer.destroy()
+        #scrolled_text.destroy()
+        #scrolled_text.vbar.destroy()
+        define_window()
+    except:
+        back_btn.destroy()
+        vertscroll.destroy()
+        listbox.destroy()
+        label.destroy()
+        define_window()
+            
+            
+            
 def items_selected(event, listbox):
     # get selected indices
     selected_indices = listbox.curselection()
@@ -236,14 +249,16 @@ def items_selected(event, listbox):
     if not os.path.exists(path_photo):
         return
     else:
-        global img, expand_btn, scrolled_text
-        img = ImageTk.PhotoImage(file=path_photo)
-        scrolled_text = ScrolledText(canvas)
-        scrolled_text.configure(state="disabled")
-        scrolled_text.image_create(INSERT, pady=1, image=img)
-        scrolled_text.grid(
-            column=1, row=1, rowspan=3, columnspan=2, sticky="NSW", padx=10, pady=10
-        )
+        global expand_btn
+        try:
+            if textContainer.winfo_exists() == True:
+                textContainer.destroy()
+                create_frame(path_photo)
+            else:
+                create_frame(path_photo)
+        except:
+            create_frame(path_photo)
+        
         ic = Image.open("/home/jovyan/work/BIG2/BigSpark/images/full_screen_icon.png")
         icon = ImageTk.PhotoImage(ic)
         try:
@@ -273,6 +288,23 @@ def items_selected(event, listbox):
             expand_btn.image = icon
             expand_btn.grid(column=3, row=1, padx=5, pady=5, sticky="N")
 
+            
+def create_frame(path_photo):
+    global textContainer, expand_btn, img
+    imgorig = Image.open(path_photo)
+    img = ImageTk.PhotoImage(imgorig)
+    textContainer = tk.Frame(canvas, borderwidth=1, relief="sunken")
+    text = tk.Text(textContainer, wrap="none", borderwidth=0)
+    textVsb = tk.Scrollbar(textContainer, orient="vertical", command=text.yview)
+    textHsb = tk.Scrollbar(textContainer, orient="horizontal", command=text.xview)
+    text.configure(yscrollcommand=textVsb.set, xscrollcommand=textHsb.set, state="disabled")
+    text.image_create(tk.END, image = img)
+    text.grid(row=0, column=0, sticky="nsew")
+    textVsb.grid(row=0, column=1, sticky="ns")
+    textHsb.grid(row=1, column=0, sticky="ew")
+    textContainer.grid_rowconfigure(0, weight=1)
+    textContainer.grid_columnconfigure(0, weight=1)
+    textContainer.grid(column=1, row=1, rowspan=3, columnspan=2, sticky="NSW", padx=10)
 
 def show_image(path_photo):
     # open image with eom
