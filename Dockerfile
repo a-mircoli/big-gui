@@ -24,7 +24,6 @@ RUN apt-get update && \
 
 # Install Python 3 packages
 RUN pip3 install Cython
-
 RUN pip3 install \
     'pandas' \
     'pyspark' \
@@ -32,8 +31,8 @@ RUN pip3 install \
     'widgetsnbextension' \
     'pyarrow' \
     'pm4py'
-
 RUN pip3 install ipython
+RUN pip3 install opencv-python-headless
 
 # Install Hadoop
 RUN wget https://archive.apache.org/dist/hadoop/common/hadoop-3.2.2/hadoop-3.2.2.tar.gz && \
@@ -62,9 +61,5 @@ EXPOSE 8088 9870 4040
 
 CMD ["bash"]
 
-# Commands to run Tkinter application
-COPY app /home/jovyan/work
-
-
-WORKDIR /home/jovyan/work/BIG2/BigSpark/
+WORKDIR home/jovyan/work/BIG2/BigSpark
 ENTRYPOINT PYTHONSTARTUP="GUI.py" pyspark

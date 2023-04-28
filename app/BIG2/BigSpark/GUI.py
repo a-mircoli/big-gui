@@ -13,6 +13,7 @@ from newbig2 import BIG as bg
 import sys, subprocess
 import os
 import _thread
+import cv2
 
 sc = SparkContext.getOrCreate()
 spark = SparkSession(sc)
@@ -286,15 +287,19 @@ def items_selected(event, listbox):
 
             
 def create_frame(path_photo):
-    global textContainer, expand_btn, img
-    imgorig = Image.open(path_photo)
-    img = ImageTk.PhotoImage(imgorig)
+    global textContainer, expand_btn, img_tk
+    img = cv2.imread(path_photo)
+    # Converte l'immagine in RGB
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # Converte l'immagine in un formato compatibile con Tkinter utilizzando PIL
+    img_pil = Image.fromarray(img)
+    img_tk = ImageTk.PhotoImage(img_pil)
     textContainer = tk.Frame(canvas, borderwidth=1, relief="sunken")
     text = tk.Text(textContainer, wrap="none", borderwidth=0)
     textVsb = tk.Scrollbar(textContainer, orient="vertical", command=text.yview)
     textHsb = tk.Scrollbar(textContainer, orient="horizontal", command=text.xview)
     text.configure(yscrollcommand=textVsb.set, xscrollcommand=textHsb.set, state="disabled")
-    text.image_create(tk.END, image = img)
+    text.image_create(tk.END, image = img_tk)
     text.grid(row=0, column=0, sticky="nsew")
     textVsb.grid(row=0, column=1, sticky="ns")
     textHsb.grid(row=1, column=0, sticky="ew")
