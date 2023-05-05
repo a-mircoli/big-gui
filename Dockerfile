@@ -31,7 +31,7 @@ RUN pip3 install \
     'widgetsnbextension' \
     'pyarrow' \
     'pm4py'
-RUN pip3 install ipython
+RUN pip3 install ipython==7.22.0
 RUN pip3 install opencv-python-headless
 
 # Install Hadoop
