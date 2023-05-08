@@ -289,9 +289,9 @@ def items_selected(event, listbox):
 def create_frame(path_photo):
     global textContainer, expand_btn, img_tk
     img = cv2.imread(path_photo)
-    # Converte l'immagine in RGB
+    # convert the image to RGB
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    # Converte l'immagine in un formato compatibile con Tkinter utilizzando PIL
+    # convert the image to a Tkinter compatible format using PIL
     img_pil = Image.fromarray(img)
     img_tk = ImageTk.PhotoImage(img_pil)
     textContainer = tk.Frame(canvas, borderwidth=1, relief="sunken")
