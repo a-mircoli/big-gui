@@ -12,7 +12,7 @@ The interface developed allows, therefore, to choose from a folder the dataset r
 Docker is an open platform for developing, shipping, and running applications that provides the ability to package and run an application in a loosely isolated environment called a container.
 Docker is used to encapsulate Hadoop, Spark and all other dependencies required to run the application.
 
-You can download and install Docker on multiple platforms. Refer to the [link](https://docs.docker.com/get-docker/) and choose the best installation path for you.
+You can download and install Docker on multiple platforms. Refer to the [link](https://docs.docker.com/get-docker/) and choose the best installation path for you. Then start Docker.
 
 ## X Window System 
 The X Window System of the host is used for displaying all GUI elements. Docker containers are isolated from the host operating system in which they run. This means that they cannot access the graphical resources of the host system directly. Using X11, a connection can be created between the container and the X11 server on the host system, allowing the container to display the GUI on the host system's screen. Basically, the X11 server runs on the host system and the X11 client runs inside the docker container, allowing the GUI to be displayed.
@@ -41,12 +41,11 @@ to allow the IP address for X11.
 
 ### Linux
 To use X11 on Linux, you could simply install the xorg-x11-server-Xorg package that provides the X server and the necessary libraries. 
-
-Then start the X11 server using the command: 
+Then run the command:
 ```
-$ Xorg :0 -listen tcp &
+$ xhost +
 ```
-This command starts the X11 server on display :0 and enables connection via TCP.
+to  allow any client to connect to the X server
 
 ## BUILD
 First of all clone the repository with the command:
@@ -80,7 +79,7 @@ in which "IPaddress" is the IP address of the host machine found with the comman
 ### Linux
 Run the command:
 ```
-$ docker run -it --rm -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd)/big_gui/app:/home/jovyan/work big_gui
+$ docker run -it --rm --net=host -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd)/big_gui/app:/home/jovyan/work big_gui
 ```
 ### Explaining container run options
 - `-it` - allow the user to access and interact with the container prompt and send keyboard input to the container
@@ -88,3 +87,9 @@ $ docker run -it --rm -e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd)/b
 - `-e DISPLAY` - sets the DISPLAY environment variable inside the container to the value of the X server's display number
 - `-v /tmp/.X11-unix:/tmp/.X11-unix` - mounts the host's X11 socket directory into the container, allowing the container to access the host's X server
 - `-v $(pwd)/big_gui/app:/home/jovyan/work` - map directory into docker container with read and write access
+
+## DEMO
+
+
+https://github.com/laurapistagnesi/big_gui/assets/49392902/67b57062-069d-48b4-b5d1-40a61ade859c
+
