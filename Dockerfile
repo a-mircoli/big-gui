@@ -7,7 +7,7 @@ RUN apt-get update && \
     apt-get install -y gcc && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Java 8
+# Install required packages
 RUN apt-get update && \
     apt-get install wget --yes && \
     apt-get install -y openjdk-8-jdk && \
