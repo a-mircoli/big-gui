@@ -16,6 +16,7 @@ import _thread
 import cv2
 import shutil
 
+
 #AM
 sc = SparkContext.getOrCreate()
 spark = SparkSession(sc)
@@ -67,13 +68,11 @@ def start_analysis(import_window, project_title_input, log_file_input, petri_net
     run_big(petri_net, log_file, project_title, import_window)
 
 
-def open_project(projects_listbox):
+def open_project(projects_listbox, window):
     selected_project = projects_listbox.get(tk.ACTIVE)
     if selected_project:
-        # Do something with the selected project
-        print(f"Opening project: {selected_project}")
-    else:
-        messagebox.showerror("Error", "Please select a project")
+        window.destroy()
+        show_trace(selected_project)
 
 def restore_black(event, project_title_input):
     project_title_input.config(fg='black')
@@ -261,7 +260,7 @@ def create_main_window():
     delete_button.grid(row=20, column=0, sticky="w", pady=(5, 0))
 
     # Create the "Open project" button
-    open_button = tk.Button(top_frame, text="Open project", font=('Roboto 10'), command=lambda: open_project(projects_listbox))
+    open_button = tk.Button(top_frame, text="Open project", font=('Roboto 10'), command=lambda: open_project(projects_listbox, window))
     open_button.grid(row=20, column=15, sticky="e", pady=(5, 0))
 
     top_frame.pack(padx=10, pady=10)
@@ -343,14 +342,9 @@ def run_big(file_net, file_xes, project_title, import_window):
     folderPath = "/home/jovyan/work/BIG2/XMLParser"
     os.chdir(folderPath)
     os.system("mvn clean install -Dmaven.clean.failOnError=false")
-    folderPath = "/home/jovyan/work/BIG2/XMLParser/target/"+project_title
-
-    if os.path.exists(folderPath):
-        shutil.rmtree(folderPath)
-    os.mkdir(folderPath)
-    os.chmod(folderPath, 0o777)
+    folderPath = "/home/jovyan/work/BIG2/XMLParser/target"
     os.chdir(folderPath)
-    nome_file_parquet = "file_parquet"
+    nome_file_parquet = project_title
     cmd = (
         "spark-submit --packages com.databricks:spark-xml_2.12:0.12.0 --class XMLParser --master local[*] XMLParser-1.0-SNAPSHOT.jar "
         + nome_file_parquet
@@ -371,7 +365,6 @@ def run_big(file_net, file_xes, project_title, import_window):
     bg(file_net, file_parquet, project_title)
     import_window.destroy()
 
-    # TODO MODIFICA DA QUI
     show_trace(project_title)
 
 
@@ -406,6 +399,36 @@ def show_gif():
         pass
 
 
+def find_files_with_same_content(folder_path):
+    file_contents = {}  # Dictionary to store file contents as keys and filenames as values
+
+    # Iterate over all files in the folder
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+
+        # Skip directories
+        if not os.path.isfile(file_path):
+            continue
+
+        # Read the file content starting from the second line
+        with open(file_path, 'r') as file:
+            content = file.read().split('\n', 1)[-1]
+
+        # Check if the content already exists in the dictionary
+        if content in file_contents:
+            file_contents[content].append(filename)
+        else:
+            file_contents[content] = [filename]
+    results = [files for files in file_contents.values()]
+    return results
+
+def update_second_listbox(event, listbox_variant, listbox_instance, variants):
+    selected_variant = listbox_variant.get(tk.ACTIVE)
+    listbox_instance.delete(0, tk.END)
+    new_instances = variants[selected_variant]
+    for i in new_instances:
+        listbox_instance.insert(0, i)
+
 def show_trace(project_title):
     # show list of trace
     '''
@@ -420,44 +443,77 @@ def show_trace(project_title):
     back_btn.grid(column=0, row=0, padx=25, pady=10)
     '''
     # Create the main window
-    window = tk.Tk()
+    results_window = tk.Tk()
 
     # Set the window attributes
-    window.title("BIG GUI")
-    MAX_WIDTH = 730
-    MAX_HEIGHT = 430
-    window.wm_maxsize(MAX_WIDTH, MAX_HEIGHT)
-    width_value = window.winfo_screenwidth()
-    height_value = window.winfo_screenheight()
+    results_window.title("BIG GUI")
+    MAX_WIDTH = 1000
+    MAX_HEIGHT = 950
+    results_window.wm_maxsize(MAX_WIDTH, MAX_HEIGHT)
+    width_value = results_window.winfo_screenwidth()
+    height_value = results_window.winfo_screenheight()
     x_position = (width_value - MAX_WIDTH) / 2
     y_position = (height_value - MAX_HEIGHT) / 2
 
-    canvas = tk.Canvas(window, width=width_value, height=height_value, highlightthickness=0)
-    canvas.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+    results_window.resizable(True, True)
 
-    listbox = tk.Listbox(canvas, font=("Times", 20))
-    list = []
-    for n in os.listdir("/home/jovyan/work/BIG2/BigSpark/projects/"+project_title+"/file"):
-        list.append(n)
-    list.sort(reverse=True, key=lambda x: int(x.split("_")[-1]))
-    for i in list:
+    ico = Image.open(os.path.join(docker_path, 'icon.png'))
+    photo = ImageTk.PhotoImage(ico)
+    results_window.wm_iconphoto(False, photo)
+
+    page_title = 'Project name: '+project_title
+    label_headline = tk.Label(results_window, text=page_title, font=('Roboto 17 bold'))
+    label_headline.grid(row=0, column=0, columnspan=3, pady=(10,10))
+
+    label_variants = tk.Label(results_window, text="Variants", font=('Roboto 13 bold'))
+    label_variants.grid(row=1, column= 0, sticky='ew')
+
+    label_instances = tk.Label(results_window, text="Traces", font=('Roboto 13 bold'))
+    label_instances.grid(row=1, column=1, sticky='ew')
+
+    label_ig = tk.Label(results_window, text="Instance Graph", font=('Roboto 13 bold'))
+    label_ig.grid(row=1, column = 2, sticky='ew')
+
+    listbox_variants = tk.Listbox(results_window, font="Roboto 14")
+    list_variants = []
+
+    variants = find_files_with_same_content("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/file")
+    print(variants)
+    for i, sublist in enumerate(variants):
+        listbox_variants.insert(END, i)
+    listbox_variants.grid(row=2, column=0, rowspan=3, sticky="n", padx=(14,7))
+
+
+    listbox = tk.Listbox(results_window, font="Roboto 14", height=20)
+    list1 = []
+    for n in os.listdir("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/file"):
+        list1.append(n)
+    list1.sort(reverse=True, key=lambda x: int(x.split("_")[-1]))
+    for i in list1:
         listbox.insert(0, i)
-    vertscroll = tk.Scrollbar(canvas)
-    vertscroll.config(command=listbox.yview)
-    listbox.config(yscrollcommand=vertscroll.set)
-    listbox.grid(column=0, row=1, sticky="NSEW", rowspan=3, columnspan=1)
-    vertscroll.grid(column=0, row=1, sticky="NES", rowspan=3, columnspan=1)
-    listbox.bind(
-        "<<ListboxSelect>>",
-        lambda event, listbox=listbox: items_selected(event, listbox),
-    )
-    label = tk.Label(
-        canvas,
-        text="Choose a trace:",
-        font=("Noto Mono bold", 18, "bold"),
-        fg="#2C5BA9",
-    )
-    label.grid(column=0, row=0, sticky="NS", pady=10)
+
+    listbox.grid(row= 2, column=1, rowspan= 3, sticky="n", padx=(7,7))
+
+    listbox_variants.bind('<<ListboxSelect>>', lambda event: update_second_listbox(None, listbox_variants, listbox, variants))
+
+    image = Image.open("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/grafi/173694.png")
+    image = image.resize((350, 350))
+    photo = ImageTk.PhotoImage(image)
+    label = tk.Label(results_window, image=photo)
+    label.image = photo
+    label.grid(row=2, column=2, sticky="n", padx=(7,14))
+
+    label_activities = tk.Label(results_window, text="Activities", font=('Roboto 13 bold'))
+    label_activities.grid(row=3, column=2, sticky='ew', padx=(7,14), pady=(7,0))
+
+    listbox_activities = tk.Listbox(results_window, font="Roboto 14")
+
+    listbox_activities.grid(row=4, column=2, sticky="ew", padx=(7,14), pady=(0,10))
+
+
+    results_window.protocol("WM_DELETE_WINDOW", lambda: quit_process(results_window))
+
+    results_window.mainloop()
 
 
 def come_back(back_btn, vertscroll, listbox, label):
