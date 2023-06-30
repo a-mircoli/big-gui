@@ -84,3 +84,14 @@ $ docker run -it --rm --net=host -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v 
 - `-e DISPLAY` - sets the DISPLAY environment variable inside the container to the value of the X server's display number
 - `-v /tmp/.X11-unix:/tmp/.X11-unix` - mounts the host's X11 socket directory into the container, allowing the container to access the host's X server
 - `-v $(pwd)/big_gui/app:/home/jovyan/work` - map directory into docker container with read and write access
+
+### Use case: building instance graphs from an event log
+In order to build instance graphs from a new event log through BIG GUI, the following procedure should be followed:
+1. open the application and click on the "+ Add new project" button;
+2. insert the project title, which must be different from existing projects, and click on the "Browse" buttons of the "Log file" and the "Petri net (.pnml)" fields in order to respectively select the event log and the Petri net. Finally, click on the "Analyze" button;
+3. the event log is analyzed and the BIG algorithm builds instance graphs. At the end of the analysis, the software shows a new window that contains information about the instance graphs and the variants to which they belong.
+4. A single variant may be inspected by double-clicking on its identifier (i.e., a progressive number): the list of traces will update accordingly, as well as the total number of traces
+5. By double-clicking on a trace, its instance graph and the list of its unique activities are shown. It is also possible to enlarge the instance graph by clicking on it.
+
+### Video
+
