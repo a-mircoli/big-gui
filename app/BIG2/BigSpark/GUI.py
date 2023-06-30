@@ -422,12 +422,60 @@ def find_files_with_same_content(folder_path):
     results = [files for files in file_contents.values()]
     return results
 
-def update_second_listbox(event, listbox_variant, listbox_instance, variants):
+def update_second_listbox(event, listbox_variant, listbox_instance, variants, label_instances):
     selected_variant = listbox_variant.get(tk.ACTIVE)
     listbox_instance.delete(0, tk.END)
     new_instances = variants[selected_variant]
     for i in new_instances:
         listbox_instance.insert(0, i)
+
+    number_traces = len(new_instances)
+    instances_text = "Traces (" + str(number_traces) + ")"
+    label_instances.config(text=instances_text)
+
+
+def change_cursor(event, label):
+    label.config(cursor="hand1")
+
+def restore_cursor(event, label):
+    label.config(cursor="")
+
+def read_activities(filename):
+    activity_list = []
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+        for line in lines[1:]:
+            words = line.strip().split()
+            if len(words) >= 3 and words[0].startswith('v') and words[2] != 'end' and words[2] != 'start':
+                third_word = words[2]
+                activity_list.append(third_word)
+
+    return activity_list
+
+def update_image_and_activities(event, listbox, label, listbox_activities, project_title, label_activities):
+    selected_instance = listbox.get(tk.ACTIVE)
+
+    # update image
+    image = Image.open("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/grafi/"+selected_instance+".png")
+    image = image.resize((250, 350))
+    photo = ImageTk.PhotoImage(image)
+    label.config(image=photo)
+    label.image = photo
+
+    # update list of activities
+    listbox_activities.delete(0, tk.END)
+    activities = read_activities("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/file/" + selected_instance)
+    for i in list(set(activities)):
+        listbox_activities.insert(END, i)
+
+    activities_text = "Distinct activities ("+str(len(list(set(activities))))+")"
+    label_activities.config(text=activities_text)
+
+
+def image_clicked(event, project_title, listbox):
+    image_path = "/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/grafi/" + listbox.get(tk.ACTIVE) + ".png"
+    os.system("eom " + image_path)
 
 def show_trace(project_title):
     # show list of trace
@@ -465,26 +513,19 @@ def show_trace(project_title):
     label_headline = tk.Label(results_window, text=page_title, font=('Roboto 17 bold'))
     label_headline.grid(row=0, column=0, columnspan=3, pady=(10,10))
 
-    label_variants = tk.Label(results_window, text="Variants", font=('Roboto 13 bold'))
-    label_variants.grid(row=1, column= 0, sticky='ew')
-
-    label_instances = tk.Label(results_window, text="Traces", font=('Roboto 13 bold'))
-    label_instances.grid(row=1, column=1, sticky='ew')
-
     label_ig = tk.Label(results_window, text="Instance Graph", font=('Roboto 13 bold'))
     label_ig.grid(row=1, column = 2, sticky='ew')
 
-    listbox_variants = tk.Listbox(results_window, font="Roboto 14")
+    listbox_variants = tk.Listbox(results_window, font="Roboto 14", height=30)
     list_variants = []
 
     variants = find_files_with_same_content("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/file")
-    print(variants)
     for i, sublist in enumerate(variants):
         listbox_variants.insert(END, i)
     listbox_variants.grid(row=2, column=0, rowspan=3, sticky="n", padx=(14,7))
 
 
-    listbox = tk.Listbox(results_window, font="Roboto 14", height=20)
+    listbox = tk.Listbox(results_window, font="Roboto 14", height=30)
     list1 = []
     for n in os.listdir("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/file"):
         list1.append(n)
@@ -494,23 +535,40 @@ def show_trace(project_title):
 
     listbox.grid(row= 2, column=1, rowspan= 3, sticky="n", padx=(7,7))
 
-    listbox_variants.bind('<<ListboxSelect>>', lambda event: update_second_listbox(None, listbox_variants, listbox, variants))
-
-    image = Image.open("/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/grafi/173694.png")
-    image = image.resize((350, 350))
+    image_path = "/home/jovyan/work/BIG2/BigSpark/projects/" + project_title + "/grafi/"+list1[0]+".png"
+    image = Image.open(image_path)
+    image = image.resize((250, 350))
     photo = ImageTk.PhotoImage(image)
     label = tk.Label(results_window, image=photo)
     label.image = photo
     label.grid(row=2, column=2, sticky="n", padx=(7,14))
 
-    label_activities = tk.Label(results_window, text="Activities", font=('Roboto 13 bold'))
+    # change cursor shape when it is over the image
+    label.bind("<Enter>", lambda event: change_cursor(None, label))
+    label.bind("<Leave>", lambda event: restore_cursor(None, label))
+
+    label.bind("<Button-1>", lambda event: image_clicked(None, project_title, listbox))
+
+    label_activities = tk.Label(results_window, text="Distinct activities", font=('Roboto 13 bold'))
     label_activities.grid(row=3, column=2, sticky='ew', padx=(7,14), pady=(7,0))
 
     listbox_activities = tk.Listbox(results_window, font="Roboto 14")
 
     listbox_activities.grid(row=4, column=2, sticky="ew", padx=(7,14), pady=(0,10))
 
+    listbox.bind('<<ListboxSelect>>', lambda event: update_image_and_activities(None, listbox, label, listbox_activities, project_title, label_activities))
 
+    number_variants = len(variants)
+    number_traces = len(list1)
+    text_variants = "Variants (" + str(number_variants) + ")"
+    text_traces = "Traces (" + str(number_traces) + ")"
+    label_variants = tk.Label(results_window, text=text_variants, font=('Roboto 13 bold'))
+    label_variants.grid(row=1, column= 0, sticky='ew')
+
+    label_instances = tk.Label(results_window, text=text_traces, font=('Roboto 13 bold'))
+    label_instances.grid(row=1, column=1, sticky='ew')
+
+    listbox_variants.bind('<<ListboxSelect>>', lambda event: update_second_listbox(None, listbox_variants, listbox, variants, label_instances))
     results_window.protocol("WM_DELETE_WINDOW", lambda: quit_process(results_window))
 
     results_window.mainloop()
