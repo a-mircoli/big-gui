@@ -1,12 +1,9 @@
-# A Graphical User Interface for a Spark implementation of the Building Instance Graph algorithm for the analysing of Big event logs
+# A Graphical User Interface for the Spark implementation of the Building Instance Graph (BIG) algorithm for the analysis of Big event logs
 
 
-Nowadays, many companies have implemented information systems to track and facilitate the execution of various business processes. These systems, thanks technological advances and increasing applications, produce a considerable amount of data that go into representing how various processes are executed. The executions of these are described within the files as a set of traces which in turn contain events. Traces represent a single instance of the process while the events represent the activities performed for each trace.
-Process mining is a process management technique that enables the analysis of business processes based on event logs. Through the use of specific algorithms applied to event logs, it is possible to discover a great deal of information regarding an information system. The goal of process mining, in fact, is to improve the latter by providing techniques and tools for the discovery of processes, organizations and social structures from starting from logs.
-One such algorithm is the Building Instance Graph (BIG), which makes it possible to extract a process model related to one of its variants. 
-Apache SPARK, an open source framework for distributed computing, was used to do this, both for uploading the log file and for processing it. Using the framework, it was possible to partition the log file by individual trace and then run the algorithm for each of them. The goal is to enhance performance by going to execute the algorithm for each trace no longer sequentially but in parallel.
-
-The interface developed allows, therefore, to choose from a folder the dataset representing the processes, to execute the BIG algorithm and to obtain a representation through a graph of the trace based on the model of the process taken in question. The whole has been placed in a Docker container so as to allow easy installation and execution of the application.
+Nowadays, many companies have implemented information systems to track and facilitate the execution of various business processes. These systems, thanks to technological advances and increasing applications, produce a considerable amount of data stored in the form of event logs, which contain information about how various processes are executed. Processes can be described as a set of traces, which in turn contain events. Traces represent a single instance of the process while the events represent the activities performed for each trace.
+The Building Instance Graph (BIG) algorithm builds instance graphs starting from the event log. BIG has been parallelized and distributed through Apache Spark. Using Spark, it was possible to partition the log file into individual trace and then run the algorithm for each of them, with the goal of enhancing performance.
+The developed GUI allows to choose from a folder the dataset representing the processes, to execute the BIG algorithm and to obtain a graph representation  of the trace based on the model of the process taken in account. The whole software has been placed in a Docker container so as to allow easy installation and execution of the application.
 
 ## Docker
 Docker is an open platform for developing, shipping, and running applications that provides the ability to package and run an application in a loosely isolated environment called a container.
@@ -50,7 +47,7 @@ to  allow any client to connect to the X server
 ## BUILD
 First of all clone the repository with the command:
 ```
-$ git clone https://github.com/laurapistagnesi/big_gui.git
+$ git clone https://github.com/a-mircoli/big-gui.git
 ```
 
 Then to build the docker image on your computer, run the following command:
@@ -87,9 +84,3 @@ $ docker run -it --rm --net=host -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v 
 - `-e DISPLAY` - sets the DISPLAY environment variable inside the container to the value of the X server's display number
 - `-v /tmp/.X11-unix:/tmp/.X11-unix` - mounts the host's X11 socket directory into the container, allowing the container to access the host's X server
 - `-v $(pwd)/big_gui/app:/home/jovyan/work` - map directory into docker container with read and write access
-
-## DEMO
-
-
-https://github.com/laurapistagnesi/big_gui/assets/49392902/67b57062-069d-48b4-b5d1-40a61ade859c
-
