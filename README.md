@@ -97,4 +97,7 @@ In order to build instance graphs from a new event log through BIG GUI, the foll
 ![visualization](./app/BIG2/BigSpark/images/visualization.png)
 
 ### Video
-![video](./app/BIG2/BigSpark/images/video.mp4)
+
+https://github.com/a-mircoli/big-gui/assets/89602325/c0d5acf5-a050-436c-9835-45341932a226
+
+
