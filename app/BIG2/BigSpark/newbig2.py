@@ -6,7 +6,7 @@ from random import random
 import pm4py
 import pandas as pd
 
-from pm4py.algo.discovery.footprints import algorithm as footprints_discovery
+#from pm4py.algo.discovery.footprints import algorithm as footprints_discovery
 from pm4py.visualization.petri_net import visualizer as pn_visualizer
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SparkSession
@@ -26,9 +26,34 @@ import time
 def stampa_record(x):
   print(x)
 
-def findCausalRelationships(net, im, fm):
-  fp_net = footprints_discovery.apply(net, im, fm)
-  return list(fp_net.get('sequence'))
+def findCausalRelationships(net):
+    dict_succ=find_successors(net)
+    result=[]
+    for key,item in dict_succ.items():
+        for s in item:
+            result.append((key.label,s.label))
+    return result
+
+
+def find_successors_of_transition(net, transition):
+    sources = {transition}
+    targets = set()
+    visited = set()
+    while sources:
+        source = sources.pop()
+        if not (type(source) is pm4py.objects.petri_net.obj.PetriNet.Transition and source.label is not None):
+            visited.add(source)
+        for arc in source.out_arcs:
+            if arc.target in visited:
+                continue
+            if type(arc.target) is pm4py.objects.petri_net.obj.PetriNet.Transition and arc.target.label is not None:
+                targets.add(arc.target)
+            else:
+                sources.add(arc.target)
+    return targets
+
+def find_successors(net):
+    return {transition: find_successors_of_transition(net, transition) for transition in net.transitions if transition.label is not None}
 
 def pick_aligned_trace(trace, net, initial_marking, final_marking):
 
@@ -646,7 +671,7 @@ def isolato(node,W):
    
    return flag
 
-def big_partitioned(f, net_path):
+def big_partitioned(f, net_path, project_title=None):
 
   print(f)
 
@@ -659,7 +684,7 @@ def big_partitioned(f, net_path):
 
   net, initial_marking, final_marking = pnml_importer.apply(net_path)
 
-  cr = findCausalRelationships(net, initial_marking, final_marking)
+  cr = findCausalRelationships(net)
   if view:
     print(cr)
 
@@ -684,7 +709,7 @@ def big_partitioned(f, net_path):
       effettiva = compliant_trace(A1)
 
       print(compliant)
-      print('Effettiva: ', effettiva)
+      print('Actual: ', effettiva)
 
       print("map: ", map)
       print("ins: ", ins)
@@ -742,7 +767,7 @@ def big_partitioned(f, net_path):
         V, W = del_repair(V, W, map, deletion)
 
       if len(ins) > len(d) + 3:
-        print('TANTEEEEEEEE')
+        print('MANY')
 
       # V,W = repair_insertion(V,W,map,ins)
       print('W aggiornata: ', W)
@@ -762,7 +787,7 @@ def big_partitioned(f, net_path):
 
       # W_sorted = sorting(W1,V)
 
-      print('W ordinata: ', W)
+      print('W sorted: ', W)
 
       graph = viewInstanceGraph(V1, W1)
 
@@ -778,21 +803,22 @@ def big_partitioned(f, net_path):
       #for i in os.listdir(dir2):
        # os.remove(os.path.join(dir2, i))
         
-      saveGFile(V1, W1, "/home/jovyan/work/BIG2/BigSpark/results/file/"+nome_file, time.time() - trace_start_time, sort_labels)
-      saveGfinal(V1, W1, "/home/jovyan/work/BIG2/BigSpark/results/{0}_instance_graphs.g".format(name), sort_labels)
+      saveGFile(V1, W1, "/home/jovyan/work/BIG2/BigSpark/projects/"+project_title+"/file/"+nome_file, time.time() - trace_start_time, sort_labels)
+      saveGfinal(V1, W1, "/home/jovyan/work/BIG2/BigSpark/projects/"+project_title+"/{0}_instance_graphs.g".format(name), sort_labels)
       #salva i grafi
       graph.format = 'png'
-      graph.render(directory="/home/jovyan/work/BIG2/BigSpark/results/grafi", filename=nome_file)
+      graph.render(directory="/home/jovyan/work/BIG2/BigSpark/projects/"+project_title+"/grafi", filename=nome_file)
 
-def BIG(net_path, file_parquet):
+def BIG(net_path, file_parquet, project_title=None):
 
   start_time_total = time.time()
 
-  spark = SparkSession.builder.appName("BigSpark").config("spark.driver.bindAddress", "172.17.0.2").master("local[4]").getOrCreate()
+  spark = SparkSession.builder.appName("BigSpark").config("spark.driver.bindAddress", "172.17.0.2").getOrCreate()
 
   intermediate_temp = time.time()
 
   net, initial_marking, final_marking = pnml_importer.apply(net_path)
+
   trace_event_activity = spark.read.parquet(file_parquet)
   trace_event_activity.printSchema()
 
@@ -801,13 +827,13 @@ def BIG(net_path, file_parquet):
   gviz.render(filename="petri")
 
   #passo come parametro anche il file della rete scelto dall'utente
-  trace_event_activity.foreachPartition(lambda f, net_path=net_path: big_partitioned(f, net_path))
+  trace_event_activity.foreachPartition(lambda f, net_path=net_path: big_partitioned(f, net_path, project_title))
   #trace_event_activity.foreachPartition(big_partitioned)
   end_time=time.time()
   esecution_time= end_time-start_time_total
   avvioSparkSession= intermediate_temp-start_time_total
-  print("il tempo di esecuzione totale è "+str(esecution_time))
-  print("Il tempo di avvio della SparkSession è "+str(avvioSparkSession))
+  print("Total execution time: "+str(esecution_time))
+  #print("Il tempo di avvio della SparkSession è "+str(avvioSparkSession))
 
 
 

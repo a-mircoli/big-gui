@@ -6,10 +6,10 @@ digraph {
 	3 [label="3 = RIBPC"]
 	4 [label="4 = RBPC"]
 	6 [label="6 = SRPP"]
-	5 [label="5 = REPC"]
-	8 [label="8 = REPP"]
-	9 [label="9 = FRPP"]
 	7 [label="7 = REPP"]
+	5 [label="5 = REPC"]
+	9 [label="9 = FRPP"]
+	8 [label="8 = REPP"]
 	13 [label="13 = SRPP"]
 	10 [label="10 = REPC"]
 	11 [label="11 = RIBPC"]
@@ -47,7 +47,7 @@ digraph {
 	2 -> 4
 	2 -> 5
 	6 -> 7
-	8 -> 9
+	7 -> 8
 	9 -> 10
 	9 -> 11
 	9 -> 12
@@ -56,7 +56,7 @@ digraph {
 	3 -> 6
 	4 -> 6
 	5 -> 6
-	7 -> 8
+	8 -> 9
 	10 -> 13
 	11 -> 13
 	12 -> 13
