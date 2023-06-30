@@ -1,0 +1,15 @@
+// Instance Graph
+digraph {
+	node [shape=circle]
+	1 [label="1 = start"]
+	2 [label="2 = A-SUBMITTED"]
+	3 [label="3 = W-Afhandelenleads"]
+	4 [label="4 = A-DECLINED"]
+	5 [label="5 = W-Afhandelenleads"]
+	6 [label="6 = end"]
+	1 -> 2
+	2 -> 3
+	3 -> 4
+	4 -> 5
+	5 -> 6
+}

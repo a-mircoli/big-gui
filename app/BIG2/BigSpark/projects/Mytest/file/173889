@@ -1,0 +1,11 @@
+# Execution Time: 0.003 s
+v 1 start
+v 2 A-SUBMITTED
+v 3 A-DECLINED
+v 4 W-Afhandelenleads
+v 5 end
+
+e 1 2 start__A-SUBMITTED
+e 2 3 A-SUBMITTED__A-DECLINED
+e 3 4 A-DECLINED__W-Afhandelenleads
+e 4 5 W-Afhandelenleads__end

@@ -1,0 +1,15 @@
+# Execution Time: 0.011 s
+v 1 start
+v 2 A-SUBMITTED
+v 3 W-Beoordelenfraude
+v 4 W-Beoordelenfraude
+v 5 A-DECLINED
+v 6 W-Beoordelenfraude
+v 7 end
+
+e 1 2 start__A-SUBMITTED
+e 2 3 A-SUBMITTED__W-Beoordelenfraude
+e 3 4 W-Beoordelenfraude__W-Beoordelenfraude
+e 4 5 W-Beoordelenfraude__A-DECLINED
+e 5 6 A-DECLINED__W-Beoordelenfraude
+e 6 7 W-Beoordelenfraude__end
