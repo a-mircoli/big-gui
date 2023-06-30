@@ -1,0 +1,39 @@
+// Instance Graph
+digraph {
+	node [shape=circle]
+	1 [label="1 = start"]
+	2 [label="2 = A-SUBMITTED"]
+	3 [label="3 = A-PREACCEPTED"]
+	4 [label="4 = A-ACCEPTED"]
+	5 [label="5 = A-FINALIZED"]
+	6 [label="6 = O-SENT"]
+	8 [label="8 = O-SENT"]
+	7 [label="7 = W-Completerenaanvraag"]
+	9 [label="9 = W-Nabellenoffertes"]
+	10 [label="10 = W-Nabellenoffertes"]
+	11 [label="11 = W-Nabellenoffertes"]
+	16 [label="16 = A-CANCELLED"]
+	12 [label="12 = W-Nabellenoffertes"]
+	13 [label="13 = W-Nabellenoffertes"]
+	14 [label="14 = W-Nabellenoffertes"]
+	15 [label="15 = W-Nabellenoffertes"]
+	17 [label="17 = W-Nabellenoffertes"]
+	18 [label="18 = end"]
+	1 -> 2
+	2 -> 3
+	3 -> 4
+	4 -> 5
+	5 -> 6
+	9 -> 10
+	10 -> 11
+	11 -> 12
+	12 -> 13
+	13 -> 14
+	14 -> 15
+	17 -> 18
+	7 -> 8
+	8 -> 9
+	15 -> 16
+	16 -> 17
+	6 -> 7
+}
